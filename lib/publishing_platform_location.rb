@@ -46,18 +46,6 @@ class PublishingPlatformLocation
   class << self
     extend Forwardable
 
-    # @!method find
-    #   Convenience wrapper. The same as calling +PublishingPlatformLocation.new.find+.
-    #   @see #find
-    #   @return [String]
-    # @!method external_url_for
-    #   Convenience wrapper. The same as calling +PublishingPlatformLocation.new.external_url_for+.
-    #   @see #external_url_for
-    #   @return [String]
-    # @!method website_root
-    #   Convenience wrapper. The same as calling +PublishingPlatformLocation.new.website_root+.
-    #   @see #website_root
-    #   @return [String]
     def_delegators :new, :find, :external_url_for, :website_root
   end    
 private
