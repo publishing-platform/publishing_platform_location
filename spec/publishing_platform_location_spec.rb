@@ -52,7 +52,7 @@ RSpec.describe PublishingPlatformLocation do
   end
 
   describe "#website_root" do
-    it "uses dev domain by default" do
+    it "uses www on dev domain by default" do
       expect(PublishingPlatformLocation.website_root).to eql "http://www.dev.publishing-platform.co.uk"
     end
 
@@ -62,4 +62,52 @@ RSpec.describe PublishingPlatformLocation do
       end
     end      
   end
+
+  describe "#external_url_for" do
+    it "uses dev domain by default" do
+      url = PublishingPlatformLocation.external_url_for("frontend")
+      expect(URI.parse(url).host).to eql "frontend.dev.publishing-platform.co.uk"
+    end  
+
+    it "uses http for dev domain" do
+      url = PublishingPlatformLocation.external_url_for("frontend")
+      expect(URI.parse(url).scheme).to eql "http"
+    end   
+    
+    it "uses provided external domain" do
+      url = PublishingPlatformLocation.new(nil, "external.co.uk").external_url_for("frontend")
+      expect(URI.parse(url).host).to eql "frontend.external.co.uk"
+    end      
+
+    it "uses environment set external domain" do      
+      ClimateControl.modify PUBLISHING_PLATFORM_APP_DOMAIN_EXTERNAL: "external.co.uk" do
+        url = PublishingPlatformLocation.external_url_for("frontend")
+        expect(URI.parse(url).host).to eql "frontend.external.co.uk"
+      end
+    end  
+
+    it "uses https for provided external domain" do
+      url = PublishingPlatformLocation.new(nil, "external.co.uk").external_url_for("frontend")
+      expect(URI.parse(url).scheme).to eql "https"
+    end      
+
+    it "uses https for environment set external domain" do      
+      ClimateControl.modify PUBLISHING_PLATFORM_APP_DOMAIN_EXTERNAL: "external.co.uk" do
+        url = PublishingPlatformLocation.external_url_for("frontend")
+        expect(URI.parse(url).scheme).to eql "https"
+      end
+    end   
+
+    it "uses http for provided external domain if forced" do
+      url = PublishingPlatformLocation.new(nil, "external.co.uk").external_url_for("frontend", force_http: true)
+      expect(URI.parse(url).scheme).to eql "http"
+    end      
+    
+    it "uses http for environment set external domain if forced" do      
+      ClimateControl.modify PUBLISHING_PLATFORM_APP_DOMAIN_EXTERNAL: "external.co.uk" do
+        url = PublishingPlatformLocation.external_url_for("frontend", force_http: true)
+        expect(URI.parse(url).scheme).to eql "http"
+      end
+    end     
+  end  
 end

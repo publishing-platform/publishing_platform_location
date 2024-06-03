@@ -36,6 +36,7 @@ class PublishingPlatformLocation
 
   # Find the external URL for a service/application.
   def external_url_for(service, options = {})
+    find(service, options.merge(external: true))
   end
 
   # Find the base URL for the public website frontend.
