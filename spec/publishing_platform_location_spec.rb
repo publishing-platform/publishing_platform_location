@@ -5,7 +5,61 @@ RSpec.describe PublishingPlatformLocation do
     expect(PublishingPlatformLocation::VERSION).not_to be nil
   end
 
-  it "does something useful" do
-    expect(false).to eq(true)
+  describe "#find" do
+    it "uses dev domain by default" do
+      url = PublishingPlatformLocation.find("publisher")
+      expect(URI.parse(url).host).to eql "publisher.dev.publishing-platform.co.uk"
+    end
+
+    it "uses http for dev domain" do
+      url = PublishingPlatformLocation.find("publisher")
+      expect(URI.parse(url).scheme).to eql "http"
+    end  
+
+    it "uses provided domain" do
+      url = PublishingPlatformLocation.new("test.publishing-platform.co.uk").find("publisher")
+      expect(URI.parse(url).host).to eql "publisher.test.publishing-platform.co.uk"
+    end
+
+    it "uses environment set domain" do
+      ClimateControl.modify PUBLISHING_PLATFORM_APP_DOMAIN: "provided-by-env.co.uk" do
+        url = PublishingPlatformLocation.find("publisher")
+        expect(url).to eql "https://publisher.provided-by-env.co.uk"
+      end
+    end    
+
+    it "uses https for provided domain" do
+      url = PublishingPlatformLocation.new("test.publishing-platform.co.uk").find("publisher")
+      expect(URI.parse(url).scheme).to eql "https"
+    end   
+
+    it "uses http for provided domain if forced" do
+      url = PublishingPlatformLocation.new("test.publishing-platform.co.uk").find("publisher", force_http: true)
+      expect(URI.parse(url).scheme).to eql "http"
+    end    
+    
+    it "uses single label domains for empty app domain" do
+      ClimateControl.modify PUBLISHING_PLATFORM_APP_DOMAIN: "" do
+        expect(PublishingPlatformLocation.find("publisher")).to eql "http://publisher"
+      end      
+
+      expect(PublishingPlatformLocation.new("").find("publisher")).to eql "http://publisher"
+    end   
+    
+    it "raises an error if service name is invalid" do
+      expect { PublishingPlatformLocation.find("invalid name") }.to raise_error(ArgumentError)
+    end       
+  end
+
+  describe "#website_root" do
+    it "uses dev domain by default" do
+      expect(PublishingPlatformLocation.website_root).to eql "http://www.dev.publishing-platform.co.uk"
+    end
+
+    it "uses environment set domain" do
+      ClimateControl.modify PUBLISHING_PLATFORM_WEBSITE_ROOT: "https://provided-by-env.co.uk" do
+        expect(PublishingPlatformLocation.website_root).to eql "https://provided-by-env.co.uk"
+      end
+    end      
   end
 end

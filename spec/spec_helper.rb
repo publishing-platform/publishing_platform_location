@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require "publishing_platform_location"
+require "uri"
+require "climate_control"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

@@ -17,4 +17,5 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_development_dependency "publishing_platform_rubocop"
+  spec.add_development_dependency "climate_control"
 end
