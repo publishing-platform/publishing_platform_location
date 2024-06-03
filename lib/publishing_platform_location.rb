@@ -8,7 +8,7 @@ class PublishingPlatformLocation
   class NoConfigurationError < StandardError; end
 
   # The fallback parent domain to use in development mode.
-  DEV_DOMAIN = "dev.publishing-platform.co.uk".freeze
+  DEV_DOMAIN = "dev.publishing-platform.co.uk"
 
   attr_reader :parent_domain, :external_domain
 
@@ -16,7 +16,7 @@ class PublishingPlatformLocation
   def initialize(domain_to_use = nil, external_domain = nil)
     @parent_domain = domain_to_use || env_var_or_fallback("PUBLISHING_PLATFORM_APP_DOMAIN", DEV_DOMAIN) # empty string for internal services
     @external_domain = external_domain || ENV.fetch("PUBLISHING_PLATFORM_APP_DOMAIN_EXTERNAL", @parent_domain)
-  end  
+  end
 
   # Find the base URL for a service/application.
   def find(service, options = {})
@@ -26,12 +26,12 @@ class PublishingPlatformLocation
     domain_suffix = domain.empty? ? "" : ".#{domain}" # empty string for internal services
 
     scheme = if options[:force_http] || http_domain?(domain)
-              "http:"
-            else
-              "https:"
-            end
+               "http:"
+             else
+               "https:"
+             end
 
-    "#{scheme}//#{name}#{domain_suffix}".freeze  
+    "#{scheme}//#{name}#{domain_suffix}".freeze
   end
 
   # Find the external URL for a service/application.
@@ -42,13 +42,14 @@ class PublishingPlatformLocation
   # Find the base URL for the public website frontend.
   def website_root
     env_var_or_fallback("PUBLISHING_PLATFORM_WEBSITE_ROOT") { find("www") }
-  end  
+  end
 
   class << self
     extend Forwardable
 
     def_delegators :new, :find, :external_url_for, :website_root
-  end    
+  end
+
 private
 
   def valid_service_name(name)
@@ -59,8 +60,8 @@ private
   end
 
   def http_domain?(domain)
-    domain == DEV_DOMAIN || domain == "" # internal services
-  end  
+    [DEV_DOMAIN, ""].include?(domain) # internal services
+  end
 
   def env_var_or_fallback(var_name, fallback_str = nil)
     if (var = ENV[var_name])

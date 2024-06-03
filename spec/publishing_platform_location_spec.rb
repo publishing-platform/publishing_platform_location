@@ -14,7 +14,7 @@ RSpec.describe PublishingPlatformLocation do
     it "uses http for dev domain" do
       url = PublishingPlatformLocation.find("publisher")
       expect(URI.parse(url).scheme).to eql "http"
-    end  
+    end
 
     it "uses provided domain" do
       url = PublishingPlatformLocation.new("test.publishing-platform.co.uk").find("publisher")
@@ -26,29 +26,29 @@ RSpec.describe PublishingPlatformLocation do
         url = PublishingPlatformLocation.find("publisher")
         expect(url).to eql "https://publisher.provided-by-env.co.uk"
       end
-    end    
+    end
 
     it "uses https for provided domain" do
       url = PublishingPlatformLocation.new("test.publishing-platform.co.uk").find("publisher")
       expect(URI.parse(url).scheme).to eql "https"
-    end   
+    end
 
     it "uses http for provided domain if forced" do
       url = PublishingPlatformLocation.new("test.publishing-platform.co.uk").find("publisher", force_http: true)
       expect(URI.parse(url).scheme).to eql "http"
-    end    
-    
+    end
+
     it "uses single label domains for empty app domain" do
       ClimateControl.modify PUBLISHING_PLATFORM_APP_DOMAIN: "" do
         expect(PublishingPlatformLocation.find("publisher")).to eql "http://publisher"
-      end      
+      end
 
       expect(PublishingPlatformLocation.new("").find("publisher")).to eql "http://publisher"
-    end   
-    
+    end
+
     it "raises an error if service name is invalid" do
       expect { PublishingPlatformLocation.find("invalid name") }.to raise_error(ArgumentError)
-    end       
+    end
   end
 
   describe "#website_root" do
@@ -60,54 +60,54 @@ RSpec.describe PublishingPlatformLocation do
       ClimateControl.modify PUBLISHING_PLATFORM_WEBSITE_ROOT: "https://provided-by-env.co.uk" do
         expect(PublishingPlatformLocation.website_root).to eql "https://provided-by-env.co.uk"
       end
-    end      
+    end
   end
 
   describe "#external_url_for" do
     it "uses dev domain by default" do
       url = PublishingPlatformLocation.external_url_for("frontend")
       expect(URI.parse(url).host).to eql "frontend.dev.publishing-platform.co.uk"
-    end  
+    end
 
     it "uses http for dev domain" do
       url = PublishingPlatformLocation.external_url_for("frontend")
       expect(URI.parse(url).scheme).to eql "http"
-    end   
-    
+    end
+
     it "uses provided external domain" do
       url = PublishingPlatformLocation.new(nil, "external.co.uk").external_url_for("frontend")
       expect(URI.parse(url).host).to eql "frontend.external.co.uk"
-    end      
+    end
 
-    it "uses environment set external domain" do      
+    it "uses environment set external domain" do
       ClimateControl.modify PUBLISHING_PLATFORM_APP_DOMAIN_EXTERNAL: "external.co.uk" do
         url = PublishingPlatformLocation.external_url_for("frontend")
         expect(URI.parse(url).host).to eql "frontend.external.co.uk"
       end
-    end  
+    end
 
     it "uses https for provided external domain" do
       url = PublishingPlatformLocation.new(nil, "external.co.uk").external_url_for("frontend")
       expect(URI.parse(url).scheme).to eql "https"
-    end      
+    end
 
-    it "uses https for environment set external domain" do      
+    it "uses https for environment set external domain" do
       ClimateControl.modify PUBLISHING_PLATFORM_APP_DOMAIN_EXTERNAL: "external.co.uk" do
         url = PublishingPlatformLocation.external_url_for("frontend")
         expect(URI.parse(url).scheme).to eql "https"
       end
-    end   
+    end
 
     it "uses http for provided external domain if forced" do
       url = PublishingPlatformLocation.new(nil, "external.co.uk").external_url_for("frontend", force_http: true)
       expect(URI.parse(url).scheme).to eql "http"
-    end      
-    
-    it "uses http for environment set external domain if forced" do      
+    end
+
+    it "uses http for environment set external domain if forced" do
       ClimateControl.modify PUBLISHING_PLATFORM_APP_DOMAIN_EXTERNAL: "external.co.uk" do
         url = PublishingPlatformLocation.external_url_for("frontend", force_http: true)
         expect(URI.parse(url).scheme).to eql "http"
       end
-    end     
-  end  
+    end
+  end
 end

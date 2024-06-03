@@ -9,13 +9,13 @@ Gem::Specification.new do |spec|
 
   spec.summary = "Generates URLs for publishing platform services based on environment."
   spec.description = "Generates URLs for publishing platform services based on environment."
-  spec.license = "MIT"  
+  spec.license = "MIT"
   spec.required_ruby_version = ">= 3.0"
 
   spec.files = Dir.glob("lib/**/*") + %w[LICENSE README.md]
 
-  spec.require_paths = ["lib"]
+  spec.require_paths = %w[lib]
 
-  spec.add_development_dependency "publishing_platform_rubocop"
   spec.add_development_dependency "climate_control"
+  spec.add_development_dependency "publishing_platform_rubocop"
 end
