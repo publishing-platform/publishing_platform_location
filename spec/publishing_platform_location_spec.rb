@@ -49,6 +49,12 @@ RSpec.describe PublishingPlatformLocation do
     it "raises an error if service name is invalid" do
       expect { PublishingPlatformLocation.find("invalid name") }.to raise_error(ArgumentError)
     end
+
+    it "prefixes hostname with value from environment variable" do
+      ClimateControl.modify PUBLISHING_PLATFORM_LOCATION_HOSTNAME_PREFIX: "draft-" do
+        expect(PublishingPlatformLocation.new("test.publishing-platform.co.uk").find("router")).to eql "https://draft-router.test.publishing-platform.co.uk"
+      end
+    end 
   end
 
   describe "#website_root" do
@@ -108,6 +114,6 @@ RSpec.describe PublishingPlatformLocation do
         url = PublishingPlatformLocation.external_url_for("frontend", force_http: true)
         expect(URI.parse(url).scheme).to eql "http"
       end
-    end
+    end  
   end
 end

@@ -10,17 +10,24 @@ class PublishingPlatformLocation
   # The fallback parent domain to use in development mode.
   DEV_DOMAIN = "dev.publishing-platform.co.uk"
 
-  attr_reader :parent_domain, :external_domain
+  attr_reader :parent_domain, :external_domain, :host_prefix
 
   # Construct a new PublishingPlatformLocation instance.
   def initialize(domain_to_use = nil, external_domain = nil)
     @parent_domain = domain_to_use || env_var_or_fallback("PUBLISHING_PLATFORM_APP_DOMAIN", DEV_DOMAIN) # empty string for internal services
     @external_domain = external_domain || ENV.fetch("PUBLISHING_PLATFORM_APP_DOMAIN_EXTERNAL", @parent_domain)
+    @host_prefix = ENV.fetch("PUBLISHING_PLATFORM_LOCATION_HOSTNAME_PREFIX", "")  
   end
 
   # Find the base URL for a service/application.
   def find(service, options = {})
     name = valid_service_name(service)
+
+    name = "#{host_prefix}#{name}"
+
+    if (service_uri = defined_service_uri_for(name))
+      return service_uri
+    end    
 
     domain = options[:external] ? external_domain : parent_domain
     domain_suffix = domain.empty? ? "" : ".#{domain}" # empty string for internal services
@@ -74,4 +81,16 @@ private
       fallback_str
     end
   end
+
+  # Overrides the URL for a given service via a corresponding
+  # environment variable.
+  #
+  # e.g. if PUBLISHING_PLATFORM_LOCATION_SERVICE_CHEESE_THING_URI
+  # was set, +PublishingPlatformLocation.new.find('cheese-thing')+ 
+  # would return the value of that variable. 
+  def defined_service_uri_for(service)
+    service_name = service.upcase.tr("-", "_")
+    uri = ENV.fetch("PUBLISHING_PLATFORM_LOCATION_SERVICE_#{service_name}_URI", "")
+    uri.empty? ? nil : uri
+  end  
 end
