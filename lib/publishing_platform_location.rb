@@ -10,24 +10,25 @@ class PublishingPlatformLocation
   # The fallback parent domain to use in development mode.
   DEV_DOMAIN = "dev.publishing-platform.co.uk"
 
-  attr_reader :parent_domain, :external_domain, :host_prefix
+  attr_reader :parent_domain, :external_domain
 
   # Construct a new PublishingPlatformLocation instance.
   def initialize(domain_to_use = nil, external_domain = nil)
     @parent_domain = domain_to_use || env_var_or_fallback("PUBLISHING_PLATFORM_APP_DOMAIN", DEV_DOMAIN) # empty string for internal services
     @external_domain = external_domain || ENV.fetch("PUBLISHING_PLATFORM_APP_DOMAIN_EXTERNAL", @parent_domain)
-    @host_prefix = ENV.fetch("PUBLISHING_PLATFORM_LOCATION_HOSTNAME_PREFIX", "")  
+    @host_prefix = ENV.fetch("PUBLISHING_PLATFORM_LOCATION_HOSTNAME_PREFIX", "")
+    @unprefixable_hosts = ENV.fetch("PUBLISHING_PLATFORM_LOCATION_UNPREFIXABLE_HOSTS", "").split(",").map(&:strip)
   end
 
   # Find the base URL for a service/application.
   def find(service, options = {})
     name = valid_service_name(service)
 
-    name = "#{host_prefix}#{name}"
-
     if (service_uri = defined_service_uri_for(name))
       return service_uri
-    end    
+    end
+
+    name = "#{host_prefix}#{name}" unless unprefixable_hosts.include?(name)
 
     domain = options[:external] ? external_domain : parent_domain
     domain_suffix = domain.empty? ? "" : ".#{domain}" # empty string for internal services
@@ -59,6 +60,8 @@ class PublishingPlatformLocation
 
 private
 
+  attr_reader :host_prefix, :unprefixable_hosts
+
   def valid_service_name(name)
     service_name = name.to_s
     return service_name if service_name.match?(/\A[a-z1-9.-]+\z/)
@@ -86,11 +89,11 @@ private
   # environment variable.
   #
   # e.g. if PUBLISHING_PLATFORM_LOCATION_SERVICE_CHEESE_THING_URI
-  # was set, +PublishingPlatformLocation.new.find('cheese-thing')+ 
-  # would return the value of that variable. 
+  # was set, +PublishingPlatformLocation.new.find('cheese-thing')+
+  # would return the value of that variable.
   def defined_service_uri_for(service)
     service_name = service.upcase.tr("-", "_")
     uri = ENV.fetch("PUBLISHING_PLATFORM_LOCATION_SERVICE_#{service_name}_URI", "")
     uri.empty? ? nil : uri
-  end  
+  end
 end

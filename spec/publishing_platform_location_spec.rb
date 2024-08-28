@@ -54,7 +54,17 @@ RSpec.describe PublishingPlatformLocation do
       ClimateControl.modify PUBLISHING_PLATFORM_LOCATION_HOSTNAME_PREFIX: "draft-" do
         expect(PublishingPlatformLocation.new("test.publishing-platform.co.uk").find("router")).to eql "https://draft-router.test.publishing-platform.co.uk"
       end
-    end 
+    end
+
+    it "does not prefix unprefixable hosts" do
+      ClimateControl.modify PUBLISHING_PLATFORM_LOCATION_HOSTNAME_PREFIX: "draft-",
+                            PUBLISHING_PLATFORM_LOCATION_UNPREFIXABLE_HOSTS: "signon,feedback" do
+        loc = PublishingPlatformLocation.new("test.publishing-platform.co.uk")
+        expect(loc.find("content-store")).to eql "https://draft-content-store.test.publishing-platform.co.uk"
+        expect(loc.find("signon")).to eql "https://signon.test.publishing-platform.co.uk"
+        expect(loc.find("feedback")).to eql "https://feedback.test.publishing-platform.co.uk"
+      end
+    end
   end
 
   describe "#website_root" do
@@ -114,6 +124,6 @@ RSpec.describe PublishingPlatformLocation do
         url = PublishingPlatformLocation.external_url_for("frontend", force_http: true)
         expect(URI.parse(url).scheme).to eql "http"
       end
-    end  
+    end
   end
 end
