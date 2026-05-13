@@ -47,6 +47,13 @@ class PublishingPlatformLocation
     find(service, options.merge(external: true))
   end
 
+  # Find the base URL for assets.
+  #
+  # @return [String] The assets base URL.
+  def asset_root
+    env_var_or_fallback("PUBLISHING_PLATFORM_ASSET_ROOT") { find("assets") }
+  end
+
   # Find the base URL for the public website frontend.
   def website_root
     env_var_or_fallback("PUBLISHING_PLATFORM_WEBSITE_ROOT") { find("www") }
@@ -55,7 +62,7 @@ class PublishingPlatformLocation
   class << self
     extend Forwardable
 
-    def_delegators :new, :find, :external_url_for, :website_root
+    def_delegators :new, :find, :external_url_for, :asset_root, :website_root
   end
 
 private

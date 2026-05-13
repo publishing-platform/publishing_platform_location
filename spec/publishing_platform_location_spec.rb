@@ -79,6 +79,36 @@ RSpec.describe PublishingPlatformLocation do
     end
   end
 
+  describe "#asset_root" do
+    it "uses assets on dev domain by default" do
+      expect(PublishingPlatformLocation.asset_root).to eql "http://assets.dev.publishing-platform.co.uk"
+    end
+
+    it "uses environment set domain" do
+      ClimateControl.modify PUBLISHING_PLATFORM_ASSET_ROOT: "https://provided-by-env.co.uk" do
+        expect(PublishingPlatformLocation.asset_root).to eql "https://provided-by-env.co.uk"
+      end
+    end
+
+    context "When PUBLISHING_PLATFORM_ASSET_ROOT env variable isn't set" do
+      it "raises an exception if RAILS_ENV is production" do
+        ClimateControl.modify RAILS_ENV: "production" do
+          expect {
+            PublishingPlatformLocation.new("foo.publishing-platform.co.uk").asset_root
+          }.to raise_error(PublishingPlatformLocation::NoConfigurationError)
+        end
+      end
+
+      it "raises an exception if RACK_ENV is production" do
+        ClimateControl.modify RACK_ENV: "production" do
+          expect {
+            PublishingPlatformLocation.new("foo.publishing-platform.co.uk").asset_root
+          }.to raise_error(PublishingPlatformLocation::NoConfigurationError)
+        end
+      end
+    end
+  end
+
   describe "#external_url_for" do
     it "uses dev domain by default" do
       url = PublishingPlatformLocation.external_url_for("frontend")
