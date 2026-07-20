@@ -18,5 +18,5 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "climate_control", "~> 1.2"
   spec.add_development_dependency "publishing_platform_rubocop", "~> 0.2"
-  spec.add_development_dependency "simplecov", "~> 0.22"
+  spec.add_development_dependency "simplecov", "~> 1.0"
 end
